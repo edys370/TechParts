@@ -36,3 +36,6 @@ backend/prisma/*.db-journal
 
 # Docker data local
 .docker/
+
+# Archivos de contexto temporal
+contexto.*

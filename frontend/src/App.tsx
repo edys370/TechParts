@@ -7,6 +7,8 @@ import { MovementsPage } from './pages/MovementsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProductModal } from './pages/ProductModal';
 import { StockMovementModal } from './pages/StockMovementModal';
+import { CompatibilityNotice } from './components/ui/CompatibilityNotice';
+import { WhatsAppButton } from './components/ui/WhatsAppButton';
 import {
   productService,
   categoryService,
@@ -129,6 +131,8 @@ export const App: React.FC = () => {
         />
 
         <main className="flex-1 p-6 max-w-7xl mx-auto w-full overflow-y-auto">
+          <CompatibilityNotice />
+
           {currentTab === 'dashboard' && (
             <DashboardPage
               metrics={metrics}
@@ -190,6 +194,8 @@ export const App: React.FC = () => {
         onSubmit={handleRegisterMovement}
         product={selectedProductForMovement}
       />
+      {/* Botón flotante de WhatsApp */}
+      <WhatsAppButton variant="floating" />
     </div>
   );
 };

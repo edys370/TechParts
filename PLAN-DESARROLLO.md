@@ -1,28 +1,29 @@
-# 📋 Plan de Desarrollo de TechParts - Distribución Equitativa (3 Desarrolladores / Agentes)
+# 📋 Plan de Desarrollo de TechParts - Alineado con Proyecto.md
+### Distribución Equitativa para 3 Desarrolladores / Agentes en 4 Fases
 
-Este documento detalla el plan maestro de desarrollo, coordinación y entrega final para el proyecto **TechParts**. La carga de trabajo está repartida equitativamente (33.3% cada uno) entre **3 Desarrolladores / Agentes**, dividiendo las acciones en **4 fases progresivas** basadas en el flujo Kanban.
+Este documento constituye el **Plan Maestro de Desarrollo y Coordinación** para el proyecto **TechParts**. Ha sido rigurosamente auditado y alineado con los requerimientos técnicos y funcionales de [`Proyecto.md`](file:///Users/edissonmorocho/PracticasWeb/techparts/Proyecto.md).
+
+La carga de trabajo se encuentra repartida equitativamente (**33.3% por cada Dev/Agente**) a través de **4 fases secuenciales**, con liderazgo técnico rotativo y criterios de aceptación claros para cada entrega.
 
 ---
 
-## 👥 Asignación de Roles y Especialidades
+## 👥 Roles, Especialidades y Asignación de Responsabilidades
 
-| Desarrollador / Agente | Rol Principal | Áreas de Enfoque | Responsabilidad Principal |
+| Desarrollador / Agente | Rol Principal | Áreas de Enfoque Principal | Responsabilidades Críticas |
 | :--- | :--- | :--- | :--- |
-| **Dev 1 (Agente 1)** | **Tech Lead & Database / Infra Architect** | Base de Datos, PostgreSQL, Docker, Prisma ORM, Infraestructura | Garantizar persistencia, integridad referencial, transacciones ACID y orquestación con Docker. |
-| **Dev 2 (Agente 2)** | **Fullstack Engineer & Business Logic** | Node.js, Express, Lógica Transaccional, Zod, Migración CSV | Implementar las reglas de negocio de stock, validaciones tipadas y migración de datos. |
-| **Dev 3 (Agente 3)** | **Frontend Lead & UI/UX Designer** | React 18, Vite, TypeScript, Tailwind CSS, Google Stitch | Crear una interfaz accesible, modular y estética con el sistema de diseño Google Stitch. |
+| **Dev 1 (Agente 1)** | **Tech Lead & Database / Infra Architect** | PostgreSQL, Docker Compose, Prisma ORM, Infraestructura, SMTP Backend | Garantizar persistencia, integridad referencial, transacciones ACID, configuración segura de servidor de correos SMTP y orquestación con Docker. |
+| **Dev 2 (Agente 2)** | **Fullstack Engineer & Business Logic** | Node.js, Express, Lógica Transaccional, Zod, Variantes de Producto, Pagos | Implementar la lógica transaccional de stock por variantes, validaciones de checkout, pasarelas de pago (transferencia/contra entrega) y envíos. |
+| **Dev 3 (Agente 3)** | **Frontend Lead & UI/UX / Customer Experience** | React 18, Vite, TypeScript, Tailwind CSS, Google Stitch, WhatsApp | Diseñar e implementar interfaces modernas, botón y flujo de WhatsApp (`wa.me/`), avisos de compatibilidad, catálogo reactivo y experiencia de checkout. |
 
 ---
 
 ## 🔄 Matriz de Liderazgo y Fases del Proyecto
 
-Cada desarrollador asume la **dirección técnica** de una fase, asegurando que todos lideren y colaboren de manera sincronizada sin cuellos de botella:
-
 ```mermaid
 flowchart LR
-    F1["Fase 1: Fundaciones & DB<br/><b>Líder: Dev 1</b>"] --> F2["Fase 2: Núcleo Transaccional<br/><b>Líder: Dev 2</b>"]
-    F2 --> F3["Fase 3: Integración & UI Stitch<br/><b>Líder: Dev 3</b>"]
-    F3 --> F4["Fase 4: Testing & Entrega Final<br/><b>Cierre Coordinado (Dev 1, 2, 3)</b>"]
+    F1["Fase 1: Catálogo, Variantes & Infra<br/><b>Líder: Dev 1</b>"] --> F2["Fase 2: Checkout, Pagos & Compatibilidad<br/><b>Líder: Dev 2</b>"]
+    F2 --> F3["Fase 3: SMTP, Facturas & WhatsApp<br/><b>Líder: Dev 3</b>"]
+    F3 --> F4["Fase 4: Testing, Informe PDF & Demo<br/><b>Cierre Coordinado (Dev 1, 2, 3)</b>"]
 ```
 
 ---
@@ -31,162 +32,155 @@ flowchart LR
 
 ---
 
-### 🟢 FASE 1: Fundaciones, Arquitectura y Base de Datos Relacional
+### 🟢 FASE 1: Fundaciones, Arquitectura, Catálogo & Variantes de Producto
 > **Líder de Fase**: **Dev 1**  
-> **Objetivo**: Establecer el entorno de desarrollo, la persistencia en PostgreSQL con Docker Compose, el esqueleto del backend y el sistema base de componentes UI en React.
+> **Objetivo**: Establecer el entorno de ejecución, persistencia en base de datos con Docker Compose, arquitectura de catálogo con soporte para productos simples y variables (control de stock independiente por variación) y fundaciones de diseño.
 
-#### 📌 Asignación de Tareas por Desarrollador:
-- **Dev 1 (Líder - Infraestructura y DB)**:
-  - [x] Configurar `docker-compose.yml` con el servicio `techparts-db` (PostgreSQL 16 Alpine, volumen persistente `techparts_pgdata` y healthcheck con `pg_isready`).
-  - [x] Diseñar el esquema declarativo de base de datos en `backend/prisma/schema.prisma`:
-    - Modelo `Category` (categorías de componentes).
-    - Modelo `Product` (atributos SKU, marca, modelo, precios, stock actual y stock mínimo).
-    - Modelo `InventoryTransaction` (auditoría inmutable de ingresos, salidas y ajustes).
-    - Modelo `User` (roles y permisos básicos).
-  - [x] Configurar las variables de entorno `.env.example` y el script de inicialización de Prisma.
-  - [ ] Validar el arranque y conexión exitosa del contenedor PostgreSQL.
+#### 📌 Asignación Equitativa de Tareas:
+- **Dev 1 (Líder - Infraestructura, Base de Datos & Modelado)**:
+  - [x] Configurar [`docker-compose.yml`](file:///Users/edissonmorocho/PracticasWeb/techparts/docker-compose.yml) con PostgreSQL 16 Alpine, volumen persistente `techparts_pgdata` y healthcheck con `pg_isready`.
+  - [x] Diseñar el esquema en [`schema.prisma`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend/prisma/schema.prisma) incorporando:
+    - Entidad `Category` (mínimo 3 categorías: Procesadores, Tarjetas Gráficas, Almacenamiento SSD, etc.).
+    - Entidad `Product` y soporte para **Variantes de Producto** (`ProductVariant`: capacidad, modelo, color, precio y stock específico por variante).
+    - Entidad `InventoryTransaction` para trazabilidad de stock por variante.
+  - [x] Configurar variables de entorno globales en `.env.example`.
+  - [ ] Validar migraciones automáticas y persistencia de datos ante reinicios de contenedor.
 
-- **Dev 2 (Backend Core & Setup)**:
-  - [x] Inicializar el proyecto Node.js con TypeScript y Express en `backend/`.
-  - [x] Implementar la instancia singleton de Prisma Client en `backend/src/utils/prisma.ts`.
-  - [x] Crear el middleware global de manejo de excepciones en `backend/src/middlewares/errorHandler.ts` con soporte para códigos de error de Prisma (P2002, P2025).
-  - [x] Implementar el middleware genérico de validación Zod en `backend/src/middlewares/validateRequest.ts`.
+- **Dev 2 (Backend Core, Seed & Ingesta de Catálogo)**:
+  - [x] Inicializar el servidor Express con TypeScript en [`backend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend).
+  - [x] Preparar el catálogo inicial en [`data/initial_inventory.csv`](file:///Users/edissonmorocho/PracticasWeb/techparts/data/initial_inventory.csv) con al menos 10 productos realistas distribuidos en más de 3 categorías con sus respectivas variantes (ej. SSD 1TB/2TB, GPUs 12GB/16GB).
+  - [x] Desarrollar el script de carga masiva y migración [`seed.ts`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend/prisma/seed.ts).
+  - [x] Implementar middleware global de manejo de excepciones y validación de tipos con Zod.
 
-- **Dev 3 (Frontend Setup & Tokens de Diseño Stitch)**:
-  - [x] Inicializar la aplicación React 18 con Vite y TypeScript en `frontend/`.
-  - [x] Configurar Tailwind CSS con los tokens visuales y la paleta de **Google Stitch** (`tailwind.config.js`).
-  - [x] Crear los componentes atómicos base:
-    - `Button.tsx` (variantes: primary, secondary, danger, outline, ghost).
-    - `Badge.tsx` (estados: success, warning, danger, info, neutral).
-    - `Card.tsx` (contenedor con sombras y bordes de Google Stitch).
-    - `Input.tsx` (campos de formulario accesibles con estados de error).
+- **Dev 3 (Frontend Setup, Tokens Stitch & Vistas Base)**:
+  - [x] Inicializar el frontend React 18 + Vite + TypeScript en [`frontend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/frontend).
+  - [x] Configurar la paleta de colores y componentes atómicos basados en **Google Stitch** y Material Design 3.
+  - [x] Crear componentes reutilizables: `Button`, `Badge`, `Card`, `Input`, `Modal` y `Table`.
+  - [x] Diseñar la estructura de navegación con Header, Sidebar y monitor de estado de conexión.
 
 #### ✅ Criterios de Aceptación (DoD Fase 1):
-1. `docker compose up -d` levanta PostgreSQL y responde positivamente al healthcheck en el puerto 5432.
-2. `npx prisma db push` o `npx prisma migrate dev` aplica el modelo relacional sin inconsistencias.
-3. El frontend compila sin errores y expone los tokens de diseño de Google Stitch.
+1. El contenedor PostgreSQL inicia saludablemente con `npm run db:up`.
+2. Existen al menos 10 productos reales/realistas con variantes y stock independiente cargados en la base de datos.
+3. El frontend compila sin errores y expone el sistema de diseño Google Stitch.
 
 ---
 
-### 🟡 FASE 2: Núcleo de Negocio & APIs Transaccionales ACID
+### 🟡 FASE 2: Métodos de Pago, Zonas de Envío & Aviso de Compatibilidad
 > **Líder de Fase**: **Dev 2**  
-> **Objetivo**: Desarrollar la lógica transaccional de control de inventario con garantías ACID, prevenir sobreventas o stocks negativos, y crear los modales interactivos para operar productos y movimientos.
+> **Objetivo**: Implementar la lógica comercial requerida por `Proyecto.md` (mínimo dos formas de pago, zonas de envío geográficas con tarifas, políticas de tienda y el aviso técnico de compatibilidad de componentes PC).
 
-#### 📌 Asignación de Tareas por Desarrollador:
-- **Dev 2 (Líder - Lógica de Negocio y Transacciones)**:
-  - [x] Implementar `InventoryService.registerMovement` en `backend/src/services/inventory.service.ts`:
-    - Ejecución dentro de `prisma.$transaction` para aislamiento transaccional.
-    - Validación de stock suficiente para transacciones de salida (`OUT`).
-    - Cálculo automático y actualización del estado del producto (`ACTIVE`, `LOW_STOCK`, `OUT_OF_STOCK`).
-    - Generación simultánea e inmutable del registro en `InventoryTransaction`.
-  - [x] Implementar esquemas de validación Zod para transacciones de stock en `backend/src/routes/inventory.routes.ts`.
-  - [x] Implementar el servicio y controlador de categorías (`CategoryService` y `CategoryController`).
+#### 📌 Asignación Equitativa de Tareas:
+- **Dev 2 (Líder - Lógica Comercial, Pagos & Envíos)**:
+  - [ ] Implementar el servicio de Checkout y Pedidos con soporte para:
+    - **Métodos de Pago**: Transferencia bancaria directa y Pago contra entrega (o pasarela Sandbox).
+    - **Zonas de Envío**: Configuración de al menos una zona geográfica con método de despacho y tarifa asignada.
+    - Definición de moneda (USD/EUR) y cálculo de impuestos básicos.
+  - [ ] Crear endpoints para gestión de pedidos y órdenes de compra con transacciones seguras (ACID).
+  - [ ] Validar reglas de descuento de stock por cada ítem/variante al completarse una orden.
 
-- **Dev 1 (Arquitectura de Datos y APIs de Consulta)**:
-  - [x] Implementar `ProductService` con filtros multi-criterio (búsqueda por texto en SKU/nombre/marca, filtro por categoría, filtro por estado y paginación).
-  - [x] Crear los controladores REST `ProductController` para operaciones CRUD completas.
-  - [x] Crear el servicio de métricas financieras de inventario `InventoryService.getDashboardMetrics` (cálculo de stock físico total, valoración al costo y a precio de venta).
+- **Dev 1 (Motor de Reglas de Compatibilidad & Integridad)**:
+  - [ ] Diseñar las reglas de compatibilidad de hardware para PC en el backend:
+    - Compatibilidad de Socket de CPU con Placa Base (ej. AM5 para Ryzen 7000/8000, LGA1700 para Intel 12-14va gen).
+    - Compatibilidad de tipo de memoria (DDR4 vs DDR5).
+    - Requerimiento de potencia sugerida de fuente de poder (PSU) según GPU seleccionada.
+  - [ ] Exponer endpoint `/api/compatibility/check` para validación asistida de compatibilidad entre piezas.
 
-- **Dev 3 (Formularios y Modales Interactivos en Frontend)**:
-  - [x] Crear el componente modal accesible `Modal.tsx` con soporte para cierre mediante tecla `Escape` y backdrop blur.
-  - [x] Implementar `ProductModal.tsx` para dar de alta nuevos productos y editar especificaciones técnicas.
-  - [x] Implementar `StockMovementModal.tsx` con cálculo dinámico en tiempo real del stock proyectado antes de confirmar la transacción.
+- **Dev 3 (UI de Checkout, Aviso de Compatibilidad & Políticas)**:
+  - [ ] Implementar el **Aviso de Compatibilidad en la Tienda** (banner informativo y alertas visuales en ficha de producto para evitar incompatibilidades de socket o potencia).
+  - [ ] Diseñar el flujo de Checkout (carrito, selección de zona de envío, método de pago y resumen con desglose de impuestos).
+  - [ ] Crear la sección de **Políticas de Envío y Devolución**, información de contacto y términos legales de la tienda TechParts.
 
 #### ✅ Criterios de Aceptación (DoD Fase 2):
-1. No es posible ejecutar una salida de stock si la cantidad solicitada supera el stock físico existente (retorna HTTP 400 descriptivo).
-2. Cada transacción de inventario actualiza el stock del producto y crea una fila de auditoría de forma atómica.
-3. Los modales del frontend validan tipos y datos antes de enviar la petición.
+1. La tienda cuenta con 2 formas de pago operativas (Transferencia Bancaria y Contra Entrega / Sandbox).
+2. Se calculan correctamente las tarifas según la zona de envío seleccionada.
+3. El aviso de compatibilidad está visible y funcional en la interfaz de la tienda.
 
 ---
 
-### 🔵 FASE 3: Integración Full-Stack, Dashboards, Filtros y Migración CSV
+### 🔵 FASE 3: Integración SMTP (Facturas y Alertas) & Canal de WhatsApp
 > **Líder de Fase**: **Dev 3**  
-> **Objetivo**: Integrar completamente el frontend con la API, construir las vistas del Dashboard con KPIs financieros, tabla de inventario con filtros en vivo y ejecutar la migración inicial de datos desde Google Sheets / CSV.
+> **Objetivo**: Desarrollar la integración de WhatsApp para atención previa y compatibilidad, y el sistema de correos transaccionales con SMTP (factura al cliente, alerta de stock bajo al admin y notificación "vuelve a estar disponible").
 
-#### 📌 Asignación de Tareas por Desarrollador:
-- **Dev 3 (Líder - Vistas de Usuario e Integración UI)**:
-  - [x] Construir la página `DashboardPage.tsx`:
-    - 4 Tarjetas de KPIs (Catálogo de SKUs, Unidades en Almacén, Alertas de Stock, Valoración Estimada).
-    - Lista destacada de componentes en stock crítico con botón rápido de reabastecimiento.
-  - [x] Construir la página `InventoryPage.tsx`:
-    - Barra de búsqueda en tiempo real con debounce y filtros combinados (categoría y estado).
-    - Tabla interactiva con badges de estado, precios, stocks y acciones rápidas (movimiento, edición, eliminación).
-  - [x] Construir la página `MovementsPage.tsx` para visualizar el libro histórico de auditoría.
-  - [x] Implementar `Header.tsx` con indicador en vivo del estado de conexión a PostgreSQL.
+#### 📌 Asignación Equitativa de Tareas:
+- **Dev 3 (Líder - Integración de WhatsApp & Experiencia de Usuario)**:
+  - [ ] Implementar el **Botón de Chat de WhatsApp**:
+    - Botón flotante accesible en todo el sitio y enlace en cabecera/pie.
+    - Botón obligatorio de **"Consulta técnica de compatibilidad"** directamente en la ficha de cada producto.
+    - Formato de URL estándar: `https://wa.me/{numero_internacional}?text={mensaje_precargado}`.
+    - Mensaje precargado dinámico: `"Hola TechParts, deseo consultar la compatibilidad técnica del producto: [Nombre/SKU del componente]"`.
+  - [ ] Mostrar en lugar visible y destacado el **Horario de Atención Técnica** al cliente.
+  - [ ] Diseñar el modal/formulario de suscripción para clientes: *"Notificarme cuando este producto vuelva a estar disponible"*.
 
-- **Dev 2 (Migración de Datos y Conectores de Red)**:
-  - [x] Crear el archivo de datos semilla `data/initial_inventory.csv` con especificaciones reales de componentes (CPUs AMD/Intel, GPUs RTX/Radeon, Memorias DDR5, Placas Base, SSDs NVMe y Fuentes 80+ Gold).
-  - [x] Desarrollar el script de seed automatizado `backend/prisma/seed.ts` utilizando streaming (`csv-parser`) para procesar el CSV y poblar PostgreSQL con transacciones iniciales.
-  - [x] Configurar el cliente HTTP centralizado con Axios en `frontend/src/api/apiClient.ts` con manejo unificado de errores y timeouts.
+- **Dev 1 (Infraestructura SMTP & Plantillas de Correo Transaccional)**:
+  - [ ] Configurar el servicio de envío de correos vía **SMTP** (utilizando Nodemailer / WP Mail SMTP con Mailtrap para pruebas locales o Brevo/Gmail con credenciales seguras vía `.env`).
+  - [ ] Prohibir terminantemente el uso de la función insegura `mail()` de PHP/Node nativo.
+  - [ ] Diseñar las **Plantillas de Correo HTML personalizadas** con la identidad de TechParts (logotipo, colores institucionales y pie de página):
+    - Correo transaccional de **Pedido Recibido** y **Factura Digital adjunta**.
+    - Correo de notificación de **"Nuevo Pedido"** para el administrador.
 
-- **Dev 1 (Monitoreo, Healthcheck & Diagnóstico)**:
-  - [x] Implementar el endpoint `GET /api/health` en `backend/src/controllers/health.controller.ts` ejecutando `SELECT 1` para medir la latencia real de respuesta de PostgreSQL.
-  - [x] Desarrollar la página `SettingsPage.tsx` en el frontend para visualización del estado del servicio, latencia de base de datos y comandos rápidos.
-  - [x] Configurar políticas de CORS restrictivas pero configurables vía variables de entorno.
+- **Dev 2 (Lógica de Automatización de Alertas & Notificaciones de Reposición)**:
+  - [ ] Implementar la **Alerta Automática de Stock Bajo** para el Administrador: cuando una transacción reduzca el stock de un producto o variante por debajo de `minStock`, disparar el correo de alerta con detalles del SKU y stock restante.
+  - [ ] Implementar la **Notificación de Reposición ("Vuelve a estar disponible")**: cuando se ejecute un ingreso (`IN`) sobre un producto agotado, notificar automáticamente a los clientes suscritos.
+  - [ ] Registrar logs de auditoría para cada correo enviado exitosamente.
 
 #### ✅ Criterios de Aceptación (DoD Fase 3):
-1. `npm run db:seed` importa satisfactoriamente todos los registros del CSV inicial y genera los movimientos de auditoría correspondientes.
-2. El Dashboard muestra KPIs calculados directamente desde la base de datos PostgreSQL.
-3. El usuario puede buscar productos y filtrar por categoría con respuesta fluida e inmediata.
+1. Cada ficha de producto cuenta con botón de WhatsApp con mensaje precargado que incluye el nombre exacto de la pieza.
+2. El flujo de compra dispara el correo transaccional con la factura correspondiente.
+3. Se verifica la llegada de correos de alerta de stock bajo al administrador y notificación de reposición a clientes en entorno SMTP (Mailtrap/Brevo).
 
 ---
 
-### 🟣 FASE 4: Testing, Auditoría de Calidad, Despliegue y Entrega Final
+### 🟣 FASE 4: Testing Integral, Evidencias, Informe Técnico (PDF) & Demo
 > **Líder de Fase**: **Cierre Coordinado y Validación Conjunta**  
-> **Objetivo**: Ejecutar pruebas de carga/concurrencia, auditoría de accesibilidad, validación cruzada y empaquetado final para la entrega.
+> **Objetivo**: Ejecutar pruebas completas del ciclo de compra, auditar accesibilidad y rendimiento, documentar todas las evidencias solicitadas en `Proyecto.md` y preparar la presentación en vivo de 5 a 10 minutos.
 
-#### 📌 Asignación de Tareas por Desarrollador:
-- **Dev 1 (Pruebas de Estrés Transaccional & Persistencia)**:
-  - [ ] Ejecutar pruebas de concurrencia simulando múltiples compras simultáneas sobre un mismo SKU para verificar que PostgreSQL y `prisma.$transaction` eviten condiciones de carrera (*race conditions*).
-  - [ ] Verificar la persistencia del volumen Docker `techparts_pgdata` al reiniciar o recrear los contenedores.
-  - [ ] Elaborar la guía de respaldo y restauración (*backup & restore*) de la base de datos PostgreSQL.
+#### 📌 Asignación Equitativa de Tareas:
+- **Dev 1 (Auditoría Técnica, Backup & Despliegue)**:
+  - [ ] Ejecutar pruebas de consistencia transaccional ACID en condiciones de concurrencia de compra.
+  - [ ] Preparar el archivo de despliegue y backup (Dump de base de datos PostgreSQL / Export All-in-One WP Migration si aplica).
+  - [ ] Redactar la sección del informe sobre **Arquitectura Técnica, Dockerización y Configuración SMTP** (con credenciales ocultas en las capturas).
 
-- **Dev 2 (Pruebas de Integración de API & Calidad de Código)**:
-  - [ ] Validar cobertura de pruebas de los endpoints de productos, inventario y categorías.
-  - [ ] Comprobar que todas las respuestas de error sigan el formato estándar `{ success: false, message: string }`.
-  - [ ] Ejecutar análisis estático de código (`npm run build` en backend) verificando 0 advertencias o errores de tipado TypeScript.
+- **Dev 2 (Pruebas del Ciclo de Compra & Manual de Usuario)**:
+  - [ ] Ejecutar y certificar el ciclo de compra completo desde dos perspectivas:
+    - Perspectiva del Cliente: selección de producto, consulta de compatibilidad, carrito, checkout, selección de pago y recepción de factura.
+    - Perspectiva del Administrador: recepción de pedido, deducción de stock y recepción de alerta de stock bajo.
+  - [ ] Elaborar el **Manual Breve de Usuario**: instructivo paso a paso para realizar una compra y para contactar al soporte técnico por WhatsApp.
+  - [ ] Redactar la justificación de decisiones comerciales, métodos de pago y zonas de envío para el informe.
 
-- **Dev 3 (Auditoría A11y, Performance & Pulido Stitch)**:
-  - [ ] Ejecutar auditoría de accesibilidad (a11y) verificando contraste de color WCAG AA en badges y botones, etiquetas semánticas y navegación por teclado.
-  - [ ] Verificar adaptabilidad responsive completa (móvil, tablet y pantallas de escritorio).
-  - [ ] Ejecutar build de producción en frontend (`npm run build`) verificando optimización de bundles y cero errores.
+- **Dev 3 (Evidencias Visuales, Informe Técnico PDF & Guión de Demo)**:
+  - [ ] Tomar y organizar el set completo de **evidencias fotográficas**:
+    - Capturas del catálogo organizado con sus variantes.
+    - Capturas del proceso de checkout y confirmación de pago.
+    - Capturas de correos recibidos (factura, stock bajo admin, reposición).
+    - Capturas de pantalla de la configuración SMTP (con claves enmascaradas).
+    - Capturas del botón de WhatsApp y del chat abierto con el mensaje precargado.
+  - [ ] Compilar y formatear el **Informe Técnico Final en formato PDF** cumpliendo con los 5 puntos obligatorios de la sección 5 de `Proyecto.md`.
+  - [ ] Diseñar el guión cronometrado para la **Presentación y Demostración en Vivo** (duración: 5 a 10 minutos).
 
 #### ✅ Criterios de Aceptación (DoD Fase 4 - Entrega Final):
-1. Build exitoso en backend (`npm run build:backend`) y frontend (`npm run build:frontend`).
-2. Persistencia verificada de datos tras `docker compose down` y `docker compose up -d`.
-3. Documentación completa con instrucciones paso a paso para evaluación o despliegue.
+1. Informe técnico en PDF completo con todas las justificaciones y capturas de evidencia.
+2. Manual breve de usuario integrado y claro.
+3. Demostración en vivo preparada y ensayada cubriendo el ciclo completo de compra y llegada de notificaciones.
 
 ---
 
-## ⚖️ Balance Equitativo de Esfuerzo (33.3% por Dev)
+## ⚖️ Matriz de Balance de Carga (33.3% por Desarrollador)
 
-| Desarrollador | Fase 1 | Fase 2 | Fase 3 | Fase 4 | Esfuerzo Total |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Dev 1 (Tech Lead / DB)** | **40% (Líder)** | 30% | 25% | 35% | **~33.3%** |
-| **Dev 2 (Fullstack / Logic)** | 30% | **45% (Líder)** | 30% | 30% | **~33.3%** |
-| **Dev 3 (Frontend / Stitch)** | 30% | 25% | **45% (Líder)** | 35% | **~33.3%** |
-
----
-
-## 🌿 Convención de Ramas Git y Flujo de Trabajo
-
-Para evitar conflictos entre los desarrolladores, se adopta el siguiente flujo de ramas:
-
-- `main`: Código estable de producción.
-- `develop`: Rama de integración donde convergen las fases.
-- **Ramas por Desarrollador y Tarea**:
-  - `dev1/fase1-docker-prisma-db`
-  - `dev2/fase2-acid-stock-services`
-  - `dev3/fase3-stitch-dashboard-ui`
-  - `dev1/fase4-acid-stress-testing`
-  - `dev2/fase4-api-integration-qa`
-  - `dev3/fase4-a11y-frontend-build`
+| Fase | Dev 1 (Tech Lead / DB / SMTP) | Dev 2 (Fullstack / Commerce) | Dev 3 (Frontend / UX / WhatsApp) | Total Fase |
+| :--- | :---: | :---: | :---: | :---: |
+| **Fase 1: Catálogo, Variantes & Infra** | **40% (Líder)** | 30% | 30% | 100% |
+| **Fase 2: Pagos, Envíos & Compatibilidad** | 30% | **40% (Líder)** | 30% | 100% |
+| **Fase 3: SMTP, Facturas & WhatsApp** | 30% | 30% | **40% (Líder)** | 100% |
+| **Fase 4: Testing, Informe PDF & Demo** | 33% | 33% | 34% | 100% |
+| **Promedio Global de Esfuerzo** | **~33.3%** | **~33.3%** | **~33.4%** | **100%** |
 
 ---
 
-## 🏁 Resumen de Entregables Finales
-1. Contenedor PostgreSQL orquestado vía Docker Compose con datos persistentes.
-2. Microservicio backend modular con endpoints REST, validación Zod y transacciones ACID.
-3. Frontend interactivo y reactivo diseñado con tokens de Google Stitch y Tailwind CSS.
-4. Datos iniciales migrados desde `data/initial_inventory.csv` con historial de auditoría.
-5. Plan de desarrollo y coordinación técnica para los 3 desarrolladores documentado en `PLAN-DESARROLLO.md`.
+## 📦 Lista de Entregables Obligatorios Compilados
+
+1. **Tienda Funcional**: Código fuente completo y probado con PostgreSQL en Docker Compose, backend transaccional y frontend reactivo con diseño Google Stitch.
+2. **Canal de WhatsApp Activo**: Botón general y botón de compatibilidad en cada ficha con mensaje precargado `wa.me/?text=...` y horario de atención.
+3. **Flujo SMTP y Correos**: Notificación de factura, alerta de stock bajo al admin y aviso de reposición a clientes con plantillas de marca.
+4. **Informe Técnico en PDF**: Justificación técnica de TechParts, decisiones de arquitectura, capturas de catálogo, checkout, SMTP y WhatsApp.
+5. **Manual Breve de Usuario**: Guía paso a paso para compras y soporte técnico.
+6. **Demostración en Vivo (5-10 min)**: Guión y entorno listo para la defensa del proyecto.
