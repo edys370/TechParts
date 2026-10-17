@@ -1,0 +1,29 @@
+services:
+  techparts-db:
+    image: postgres:16-alpine
+    container_name: techparts-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-techparts_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-techparts_secret_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-techparts_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - techparts_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-techparts_admin} -d $${POSTGRES_DB:-techparts_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - techparts-net
+
+volumes:
+  techparts_pgdata:
+    driver: local
+
+networks:
+  techparts-net:
+    driver: bridge

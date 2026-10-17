@@ -1,0 +1,31 @@
+{
+  "name": "techparts-workspace",
+  "version": "1.0.0",
+  "description": "TechParts - Sistema integral de inventario y catálogo de componentes tecnológicos",
+  "private": true,
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f techparts-db",
+    "db:migrate": "npm --prefix backend run prisma:migrate",
+    "db:generate": "npm --prefix backend run prisma:generate",
+    "db:seed": "npm --prefix backend run prisma:seed",
+    "db:studio": "npm --prefix backend run prisma:studio"
+  },
+  "keywords": [
+    "techparts",
+    "inventory",
+    "react",
+    "typescript",
+    "express",
+    "prisma",
+    "postgresql",
+    "docker"
+  ],
+  "author": "TechParts Team",
+  "license": "MIT"
+}

@@ -1,0 +1,13 @@
+sku,name,category,brand,model,price,costPrice,stock,minStock,description
+CPU-AMD-7800X3D,AMD Ryzen 7 7800X3D 8-Core 16-Thread,Procesadores,AMD,Ryzen 7 7800X3D,449.99,380.00,24,5,Procesador gaming tope de gama con tecnología 3D V-Cache y arquitectura Zen 4.
+CPU-INT-14700K,Intel Core i7-14700K 20-Core,Procesadores,Intel,Core i7-14700K,409.99,340.00,18,4,Procesador de 14va generación con 20 núcleos y 28 hilos hasta 5.6 GHz.
+GPU-NV-4070S,NVIDIA GeForce RTX 4070 Super 12GB,Tarjetas Gráficas,NVIDIA,RTX 4070 Super,599.99,510.00,12,3,Tarjeta gráfica con arquitectura Ada Lovelace y soporte DLSS 3.5.
+GPU-AMD-7800XT,AMD Radeon RX 7800 XT 16GB,Tarjetas Gráficas,AMD,RX 7800 XT,499.99,420.00,15,3,Tarjeta gráfica con 16GB GDDR6 para gaming 1440p fluido y alto rendimiento.
+RAM-CRU-32GB-DDR5,Crucial Pro 32GB (2x16GB) DDR5 6000MHz,Memorias RAM,Crucial,Pro DDR5-6000,119.99,92.00,40,8,Kit de memoria RAM dual channel DDR5 de alta velocidad optimizado para Intel XMP y AMD EXPO.
+RAM-COR-32GB-RGB,Corsair Vengeance RGB 32GB DDR5 6400MHz,Memorias RAM,Corsair,Vengeance RGB DDR5,139.99,105.00,25,6,Memoria RAM DDR5 premium con iluminación RGB personalizable por software iCUE.
+MB-ASU-B650P,ASUS TUF Gaming B650-PLUS WiFi,Placas Base,ASUS,TUF B650-PLUS,219.99,175.00,10,2,Placa base socket AM5 con PCIe 5.0, WiFi 6 y disipadores térmicos de grado militar.
+MB-MSI-Z790P,MSI PRO Z790-A MAX WiFi,Placas Base,MSI,PRO Z790-A,239.99,190.00,8,2,Placa base ATX LGA 1700 compatible con procesadores Intel Core 12va a 14va generación.
+SSD-SAM-990P-2TB,Samsung 990 PRO 2TB NVMe M.2 SSD,Almacenamiento,Samsung,990 PRO 2TB,179.99,140.00,30,5,Unidad de estado sólido PCIe Gen 4.0 con velocidades de lectura de hasta 7450 MB/s.
+SSD-KNG-KC3000-1TB,Kingston KC3000 1TB PCIe 4.0 NVMe,Almacenamiento,Kingston,KC3000 1TB,94.99,72.00,35,6,SSD NVMe M.2 de alto rendimiento para creadores de contenido y entusiastas.
+PSU-COR-RM850X,Corsair RM850x 850W 80 Plus Gold Modular,Fuentes de Poder,Corsair,RM850x,149.99,115.00,16,4,Fuente de alimentación totalmente modular con condensadores 100% japoneses y certificación 80 Plus Gold.
+PSU-SEA-GX750,Seasonic Focus GX-750 750W 80+ Gold,Fuentes de Poder,Seasonic,Focus GX-750,129.99,98.00,14,3,Fuente de alimentación compacta de 750W con ventilador Fluid Dynamic Bearing silencioso.

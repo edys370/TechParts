@@ -1,0 +1,72 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id           Int                    @id @default(autoincrement())
+  sku          String                 @unique
+  name         String
+  description  String?
+  brand        String
+  model        String
+  price        Decimal                @db.Decimal(10, 2)
+  costPrice    Decimal                @db.Decimal(10, 2)
+  stock        Int                    @default(0)
+  minStock     Int                    @default(5)
+  status       String                 @default("ACTIVE") // ACTIVE, LOW_STOCK, OUT_OF_STOCK, INACTIVE
+  categoryId   Int
+  category     Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  transactions InventoryTransaction[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@index([categoryId])
+  @@index([brand])
+  @@index([sku])
+  @@map("products")
+}
+
+model InventoryTransaction {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type          String   // "IN" (Entrada), "OUT" (Salida), "ADJUSTMENT" (Ajuste)
+  quantity      Int      // Cantidad movida
+  previousStock Int      // Stock previo a la operación
+  newStock      Int      // Stock resultante
+  reason        String?  // Motivo del movimiento
+  reference     String?  // Referencia documental (OC, Factura, Ticket)
+  createdAt     DateTime @default(now())
+
+  @@index([productId])
+  @@index([type])
+  @@map("inventory_transactions")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  role      String   @default("OPERATOR") // ADMIN, OPERATOR, VIEWER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
