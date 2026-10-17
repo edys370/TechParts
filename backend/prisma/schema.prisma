@@ -28,11 +28,13 @@ model Product {
   model        String
   price        Decimal                @db.Decimal(10, 2)
   costPrice    Decimal                @db.Decimal(10, 2)
-  stock        Int                    @default(0)
+  stock        Int                    @default(0) // Stock consolidado
   minStock     Int                    @default(5)
   status       String                 @default("ACTIVE") // ACTIVE, LOW_STOCK, OUT_OF_STOCK, INACTIVE
+  hasVariants  Boolean                @default(false)
   categoryId   Int
   category     Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  variants     ProductVariant[]
   transactions InventoryTransaction[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
@@ -43,19 +45,45 @@ model Product {
   @@map("products")
 }
 
-model InventoryTransaction {
-  id            Int      @id @default(autoincrement())
-  productId     Int
-  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  type          String   // "IN" (Entrada), "OUT" (Salida), "ADJUSTMENT" (Ajuste)
-  quantity      Int      // Cantidad movida
-  previousStock Int      // Stock previo a la operación
-  newStock      Int      // Stock resultante
-  reason        String?  // Motivo del movimiento
-  reference     String?  // Referencia documental (OC, Factura, Ticket)
-  createdAt     DateTime @default(now())
+model ProductVariant {
+  id           Int                    @id @default(autoincrement())
+  productId    Int
+  product      Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku          String                 @unique
+  name         String                 // Ej: "1TB / Negro", "2TB / Plateado"
+  capacity     String?                // Ej: "1TB", "2TB", "32GB", "16GB"
+  color        String?                // Ej: "Negro", "Blanco", "RGB"
+  modelVariant String?                // Ej: "OC Edition", "V2", "Standard"
+  price        Decimal                @db.Decimal(10, 2)
+  costPrice    Decimal                @db.Decimal(10, 2)
+  stock        Int                    @default(0) // Control de stock independiente por variación
+  minStock     Int                    @default(3)
+  status       String                 @default("ACTIVE") // ACTIVE, LOW_STOCK, OUT_OF_STOCK
+  transactions InventoryTransaction[]
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
 
   @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
+}
+
+model InventoryTransaction {
+  id            Int             @id @default(autoincrement())
+  productId     Int
+  product       Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId     Int?            // Trazabilidad específica si el movimiento es sobre una variante
+  variant       ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  type          String          // "IN" (Entrada), "OUT" (Salida), "ADJUSTMENT" (Ajuste)
+  quantity      Int             // Cantidad movida
+  previousStock Int             // Stock previo a la operación
+  newStock      Int             // Stock resultante
+  reason        String?         // Motivo del movimiento
+  reference     String?         // Referencia documental (OC, Factura, Ticket)
+  createdAt     DateTime        @default(now())
+
+  @@index([productId])
+  @@index([variantId])
   @@index([type])
   @@map("inventory_transactions")
 }

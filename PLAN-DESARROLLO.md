@@ -44,19 +44,19 @@ flowchart LR
     - Entidad `Product` y soporte para **Variantes de Producto** (`ProductVariant`: capacidad, modelo, color, precio y stock específico por variante).
     - Entidad `InventoryTransaction` para trazabilidad de stock por variante.
   - [x] Configurar variables de entorno globales en `.env.example`.
-  - [ ] Validar migraciones automáticas y persistencia de datos ante reinicios de contenedor.
+  - [x] Validar migraciones automáticas y persistencia de datos ante reinicios de contenedor.
 
 - **Dev 2 (Backend Core, Seed & Ingesta de Catálogo)**:
-  - [x] Inicializar el servidor Express con TypeScript en [`backend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend).
-  - [x] Preparar el catálogo inicial en [`data/initial_inventory.csv`](file:///Users/edissonmorocho/PracticasWeb/techparts/data/initial_inventory.csv) con al menos 10 productos realistas distribuidos en más de 3 categorías con sus respectivas variantes (ej. SSD 1TB/2TB, GPUs 12GB/16GB).
-  - [x] Desarrollar el script de carga masiva y migración [`seed.ts`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend/prisma/seed.ts).
-  - [x] Implementar middleware global de manejo de excepciones y validación de tipos con Zod.
+  - [ ] Inicializar el servidor Express con TypeScript en [`backend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend).
+  - [ ] Preparar el catálogo inicial en [`data/initial_inventory.csv`](file:///Users/edissonmorocho/PracticasWeb/techparts/data/initial_inventory.csv) con al menos 10 productos realistas distribuidos en más de 3 categorías con sus respectivas variantes (ej. SSD 1TB/2TB, GPUs 12GB/16GB).
+  - [ ] Desarrollar el script de carga masiva y migración [`seed.ts`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend/prisma/seed.ts).
+  - [ ] Implementar middleware global de manejo de excepciones y validación de tipos con Zod.
 
 - **Dev 3 (Frontend Setup, Tokens Stitch & Vistas Base)**:
-  - [x] Inicializar el frontend React 18 + Vite + TypeScript en [`frontend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/frontend).
-  - [x] Configurar la paleta de colores y componentes atómicos basados en **Google Stitch** y Material Design 3.
-  - [x] Crear componentes reutilizables: `Button`, `Badge`, `Card`, `Input`, `Modal` y `Table`.
-  - [x] Diseñar la estructura de navegación con Header, Sidebar y monitor de estado de conexión.
+  - [ ] Inicializar el frontend React 18 + Vite + TypeScript en [`frontend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/frontend).
+  - [ ] Configurar la paleta de colores y componentes atómicos basados en **Google Stitch** y Material Design 3.
+  - [ ] Crear componentes reutilizables: `Button`, `Badge`, `Card`, `Input`, `Modal` y `Table`.
+  - [ ] Diseñar la estructura de navegación con Header, Sidebar y monitor de estado de conexión.
 
 #### ✅ Criterios de Aceptación (DoD Fase 1):
 1. El contenedor PostgreSQL inicia saludablemente con `npm run db:up`.

@@ -8,9 +8,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-techparts_secret_2026}
       POSTGRES_DB: ${POSTGRES_DB:-techparts_db}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5435}:5432"
     volumes:
       - techparts_pgdata:/var/lib/postgresql/data
+      - ./backend/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-techparts_admin} -d $${POSTGRES_DB:-techparts_db}"]
       interval: 5s
