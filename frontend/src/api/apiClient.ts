@@ -1,5 +1,16 @@
 import axios from 'axios';
-import { Product, Category, InventoryTransaction, DashboardMetrics, MovementType } from '../types';
+import {
+  Product,
+  Category,
+  InventoryTransaction,
+  DashboardMetrics,
+  MovementType,
+  ShippingZone,
+  Order,
+  CompatibilityResult,
+  ProductSubscription,
+  EmailLog,
+} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
@@ -13,7 +24,7 @@ export const apiClient = axios.create({
 
 // Servicio de Productos
 export const productService = {
-  async getAll(params?: { search?: string; categoryId?: number; brand?: string; status?: string; page?: number }) {
+  async getAll(params?: { search?: string; categoryId?: number; brand?: string; status?: string; page?: number; limit?: number }) {
     const response = await apiClient.get('/products', { params });
     return response.data;
   },
@@ -23,12 +34,12 @@ export const productService = {
     return response.data;
   },
 
-  async create(data: Partial<Product>): Promise<{ success: boolean; data: Product }> {
+  async create(data: any): Promise<{ success: boolean; data: Product }> {
     const response = await apiClient.post('/products', data);
     return response.data;
   },
 
-  async update(id: number, data: Partial<Product>): Promise<{ success: boolean; data: Product }> {
+  async update(id: number, data: any): Promise<{ success: boolean; data: Product }> {
     const response = await apiClient.put(`/products/${id}`, data);
     return response.data;
   },
@@ -56,6 +67,7 @@ export const categoryService = {
 export const inventoryService = {
   async registerMovement(data: {
     productId: number;
+    variantId?: number;
     type: MovementType;
     quantity: number;
     reason?: string;
@@ -65,7 +77,7 @@ export const inventoryService = {
     return response.data;
   },
 
-  async getMovements(params?: { productId?: number; type?: MovementType; limit?: number }): Promise<{
+  async getMovements(params?: { productId?: number; variantId?: number; type?: MovementType; limit?: number }): Promise<{
     success: boolean;
     data: InventoryTransaction[];
   }> {
@@ -84,6 +96,62 @@ export const inventoryService = {
   },
 };
 
+// Servicio de Pedidos y Checkout (Fase 2 - Dev 2 Líder)
+export const orderService = {
+  async create(data: {
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    customerAddress: string;
+    customerCity: string;
+    customerCedula?: string;
+    shippingZoneId: number;
+    paymentMethod: 'BANK_TRANSFER' | 'CASH_ON_DELIVERY' | 'SANDBOX_CARD';
+    notes?: string;
+    items: Array<{ productId: number; variantId?: number; quantity: number }>;
+  }): Promise<{ success: boolean; message: string; data: Order; paymentInstructions?: any }> {
+    const response = await apiClient.post('/orders', data);
+    return response.data;
+  },
+
+  async getAll(params?: { search?: string; status?: string; page?: number; limit?: number }): Promise<{
+    success: boolean;
+    total: number;
+    data: Order[];
+  }> {
+    const response = await apiClient.get('/orders', { params });
+    return response.data;
+  },
+
+  async getById(id: string | number): Promise<{ success: boolean; data: Order; bankTransferDetails?: any }> {
+    const response = await apiClient.get(`/orders/${id}`);
+    return response.data;
+  },
+
+  async getShippingZones(): Promise<{ success: boolean; data: ShippingZone[] }> {
+    const response = await apiClient.get('/orders/shipping-zones');
+    return response.data;
+  },
+
+  async getPaymentMethods(): Promise<{ success: boolean; data: any[] }> {
+    const response = await apiClient.get('/orders/payment-methods');
+    return response.data;
+  },
+
+  async updateStatus(id: number, status: string, paymentStatus?: string): Promise<{ success: boolean; data: Order }> {
+    const response = await apiClient.patch(`/orders/${id}/status`, { status, paymentStatus });
+    return response.data;
+  },
+};
+
+// Servicio de Compatibilidad de Hardware (Fase 2 - Dev 1)
+export const compatibilityService = {
+  async check(productIds: number[]): Promise<{ success: boolean; data: CompatibilityResult }> {
+    const response = await apiClient.post('/compatibility/check', { productIds });
+    return response.data;
+  },
+};
+
 // Healthcheck
 export const healthService = {
   async check(): Promise<any> {
@@ -91,3 +159,40 @@ export const healthService = {
     return response.data;
   },
 };
+
+// Servicio de Suscripciones para Reposición de Stock ("Vuelve a estar disponible" - Fase 3)
+export const subscriptionService = {
+  async subscribe(data: {
+    email: string;
+    customerName?: string;
+    productId: number;
+    variantId?: number;
+  }): Promise<{ success: boolean; message: string; data: ProductSubscription; alreadySubscribed: boolean }> {
+    const response = await apiClient.post('/subscriptions', data);
+    return response.data;
+  },
+
+  async getAll(params?: { status?: string; limit?: number }): Promise<{ success: boolean; total: number; data: ProductSubscription[] }> {
+    const response = await apiClient.get('/subscriptions', { params });
+    return response.data;
+  },
+};
+
+// Servicio de Auditoría y Verificación SMTP (Fase 3)
+export const emailService = {
+  async getLogs(params?: { limit?: number; templateType?: string }): Promise<{
+    success: boolean;
+    total: number;
+    smtpConfig: any;
+    data: EmailLog[];
+  }> {
+    const response = await apiClient.get('/email-logs', { params });
+    return response.data;
+  },
+
+  async sendTest(to?: string): Promise<{ success: boolean; message: string; result: any }> {
+    const response = await apiClient.post('/email-logs/test', { to });
+    return response.data;
+  },
+};
+

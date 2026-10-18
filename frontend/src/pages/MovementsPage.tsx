@@ -160,7 +160,7 @@ export const MovementsPage: React.FC<MovementsPageProps> = ({ movements, isLoadi
                         {m.reference || 'N/A'}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 max-w-xs truncate" title={m.reason}>
+                    <td className="py-3.5 px-4 text-slate-600 max-w-xs truncate" title={m.reason || undefined}>
                       {m.reason || 'Sin observación'}
                     </td>
                   </tr>

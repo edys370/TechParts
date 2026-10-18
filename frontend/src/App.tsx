@@ -1,24 +1,39 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/layout/Header';
 import { Sidebar, TabType } from './components/layout/Sidebar';
+import { ShopPage } from './pages/ShopPage';
+import { CompatibilityPage } from './pages/CompatibilityPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { InventoryPage } from './pages/InventoryPage';
+import { OrdersPage } from './pages/OrdersPage';
 import { MovementsPage } from './pages/MovementsPage';
+import { PoliciesPage } from './pages/PoliciesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProductModal } from './pages/ProductModal';
 import { StockMovementModal } from './pages/StockMovementModal';
+import { CheckoutModal } from './pages/CheckoutModal';
 import { CompatibilityNotice } from './components/ui/CompatibilityNotice';
 import { WhatsAppButton } from './components/ui/WhatsAppButton';
 import {
   productService,
   categoryService,
   inventoryService,
+  orderService,
   healthService,
 } from './api/apiClient';
-import { Product, Category, InventoryTransaction, DashboardMetrics, MovementType } from './types';
+import {
+  Product,
+  Category,
+  InventoryTransaction,
+  DashboardMetrics,
+  MovementType,
+  CartItem,
+  ProductVariant,
+  Order,
+} from './types';
 
 export const App: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<TabType>('dashboard');
+  const [currentTab, setCurrentTab] = useState<TabType>('shop');
   const [apiStatus, setApiStatus] = useState<'connected' | 'connecting' | 'disconnected'>('connecting');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -28,9 +43,17 @@ export const App: React.FC = () => {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [lowStockAlerts, setLowStockAlerts] = useState<Product[]>([]);
   const [movements, setMovements] = useState<InventoryTransaction[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Estados de Modales
+  // Carrito de Compras (Fase 2)
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+
+  // Asistente de Compatibilidad (Fase 2)
+  const [compatibilityPreselect, setCompatibilityPreselect] = useState<Product | null>(null);
+
+  // Estados de Modales Administrativos
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isMovementModalOpen, setIsMovementModalOpen] = useState(false);
@@ -40,7 +63,6 @@ export const App: React.FC = () => {
   const loadData = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      // 1. Probar salud de la API
       try {
         await healthService.check();
         setApiStatus('connected');
@@ -48,13 +70,13 @@ export const App: React.FC = () => {
         setApiStatus('disconnected');
       }
 
-      // 2. Traer recursos
-      const [prodRes, catRes, metricRes, alertRes, movRes] = await Promise.allSettled([
-        productService.getAll(),
+      const [prodRes, catRes, metricRes, alertRes, movRes, ordRes] = await Promise.allSettled([
+        productService.getAll({ limit: 100 }),
         categoryService.getAll(),
         inventoryService.getMetrics(),
         inventoryService.getAlerts(),
         inventoryService.getMovements({ limit: 100 }),
+        orderService.getAll({ limit: 50 }),
       ]);
 
       if (prodRes.status === 'fulfilled' && prodRes.value.data) {
@@ -72,6 +94,9 @@ export const App: React.FC = () => {
       if (movRes.status === 'fulfilled' && movRes.value.data) {
         setMovements(movRes.value.data);
       }
+      if (ordRes.status === 'fulfilled' && ordRes.value.data) {
+        setOrders(ordRes.value.data);
+      }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -82,7 +107,52 @@ export const App: React.FC = () => {
     loadData();
   }, [loadData]);
 
-  // Manejadores de Productos
+  // Manejo del Carrito de Compras (Fase 2)
+  const handleAddToCart = (product: Product, variant?: ProductVariant, quantity: number = 1) => {
+    setCart((prev) => {
+      const existingIdx = prev.findIndex((item) => {
+        if (variant) {
+          return item.product.id === product.id && item.selectedVariant?.id === variant.id;
+        }
+        return item.product.id === product.id && !item.selectedVariant;
+      });
+
+      if (existingIdx >= 0) {
+        const next = [...prev];
+        next[existingIdx].quantity += quantity;
+        return next;
+      }
+      return [...prev, { product, selectedVariant: variant || null, quantity }];
+    });
+  };
+
+  const handleUpdateCartQuantity = (index: number, quantity: number) => {
+    setCart((prev) => {
+      const next = [...prev];
+      next[index].quantity = quantity;
+      return next;
+    });
+  };
+
+  const handleRemoveFromCart = (index: number) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  const handleOrderSuccess = (order: Order) => {
+    loadData();
+  };
+
+  // Abrir asistente de compatibilidad con producto preseleccionado
+  const handleOpenCompatibility = (preselected?: Product) => {
+    setCompatibilityPreselect(preselected || null);
+    setCurrentTab('compatibility');
+  };
+
+  // Guardar y Eliminar Productos (Admin)
   const handleSaveProduct = async (formData: any) => {
     if (editingProduct) {
       await productService.update(editingProduct.id, formData);
@@ -103,7 +173,7 @@ export const App: React.FC = () => {
     }
   };
 
-  // Manejador de Movimientos de Stock (ACID)
+  // Movimiento de inventario ACID
   const handleRegisterMovement = async (data: {
     productId: number;
     type: MovementType;
@@ -115,12 +185,16 @@ export const App: React.FC = () => {
     await loadData();
   };
 
+  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="min-h-screen bg-stitch-surface flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
       <Header
         apiStatus={apiStatus}
         onRefresh={loadData}
         isRefreshing={isRefreshing}
+        cartCount={totalCartCount}
+        onOpenCart={() => setIsCheckoutOpen(true)}
       />
 
       <div className="flex-1 flex">
@@ -128,10 +202,34 @@ export const App: React.FC = () => {
           currentTab={currentTab}
           onTabChange={setCurrentTab}
           lowStockCount={lowStockAlerts.length}
+          ordersCount={orders.length}
         />
 
-        <main className="flex-1 p-6 max-w-7xl mx-auto w-full overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto w-full overflow-y-auto">
+          {/* Aviso Global de Compatibilidad de la tienda (Requerimiento Proyecto.md) */}
           <CompatibilityNotice />
+
+          {/* Vistas según la pestaña activa */}
+          {currentTab === 'shop' && (
+            <ShopPage
+              products={products}
+              categories={categories}
+              onAddToCart={handleAddToCart}
+              onOpenCompatibilityAssistant={handleOpenCompatibility}
+            />
+          )}
+
+          {currentTab === 'compatibility' && (
+            <CompatibilityPage
+              products={products}
+              initialSelectedProduct={compatibilityPreselect}
+              onAddToCart={handleAddToCart}
+            />
+          )}
+
+          {currentTab === 'policies' && <PoliciesPage />}
+
+          {currentTab === 'orders' && <OrdersPage />}
 
           {currentTab === 'dashboard' && (
             <DashboardPage
@@ -178,7 +276,18 @@ export const App: React.FC = () => {
         </main>
       </div>
 
-      {/* Modal de Producto */}
+      {/* Modal de Carrito y Checkout (Fase 2) */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        cart={cart}
+        onUpdateQuantity={handleUpdateCartQuantity}
+        onRemoveItem={handleRemoveFromCart}
+        onClearCart={handleClearCart}
+        onOrderSuccess={handleOrderSuccess}
+      />
+
+      {/* Modal de Producto (Crear / Editar) */}
       <ProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
@@ -187,14 +296,15 @@ export const App: React.FC = () => {
         categories={categories}
       />
 
-      {/* Modal de Movimiento de Stock */}
+      {/* Modal de Movimiento de Stock ACID */}
       <StockMovementModal
         isOpen={isMovementModalOpen}
         onClose={() => setIsMovementModalOpen(false)}
         onSubmit={handleRegisterMovement}
         product={selectedProductForMovement}
       />
-      {/* Botón flotante de WhatsApp */}
+
+      {/* Botón flotante permanente de WhatsApp con número internacional y wa.me */}
       <WhatsAppButton variant="floating" />
     </div>
   );

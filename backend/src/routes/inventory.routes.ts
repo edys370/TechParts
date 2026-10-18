@@ -7,6 +7,7 @@ const router = Router();
 
 const movementSchema = z.object({
   productId: z.number().int().positive('ID de producto inválido'),
+  variantId: z.number().int().positive('ID de variante inválido').optional(),
   type: z.enum(['IN', 'OUT', 'ADJUSTMENT'], {
     errorMap: () => ({ message: "El tipo debe ser 'IN', 'OUT' o 'ADJUSTMENT'" }),
   }),

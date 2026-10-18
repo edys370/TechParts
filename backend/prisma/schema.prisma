@@ -28,14 +28,21 @@ model Product {
   model        String
   price        Decimal                @db.Decimal(10, 2)
   costPrice    Decimal                @db.Decimal(10, 2)
-  stock        Int                    @default(0) // Stock consolidado
+  stock        Int                    @default(0) // Stock consolidado o para productos simples
   minStock     Int                    @default(5)
   status       String                 @default("ACTIVE") // ACTIVE, LOW_STOCK, OUT_OF_STOCK, INACTIVE
   hasVariants  Boolean                @default(false)
+  socket       String?                // e.g. "AM5", "LGA1700"
+  ramType      String?                // e.g. "DDR5", "DDR4"
+  wattage      Int?                   // TDP / Wattage para compatibilidad (W)
+  formFactor   String?                // e.g. "ATX", "Micro-ATX", "M.2-2280"
+  imageUrl     String?
   categoryId   Int
   category     Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   variants     ProductVariant[]
   transactions InventoryTransaction[]
+  orderItems   OrderItem[]
+  subscriptions ProductSubscription[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
 
@@ -50,7 +57,7 @@ model ProductVariant {
   productId    Int
   product      Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
   sku          String                 @unique
-  name         String                 // Ej: "1TB / Negro", "2TB / Plateado"
+  name         String                 // Ej: "1TB / Negro", "2TB / Plateado", "OC 16GB"
   capacity     String?                // Ej: "1TB", "2TB", "32GB", "16GB"
   color        String?                // Ej: "Negro", "Blanco", "RGB"
   modelVariant String?                // Ej: "OC Edition", "V2", "Standard"
@@ -60,6 +67,8 @@ model ProductVariant {
   minStock     Int                    @default(3)
   status       String                 @default("ACTIVE") // ACTIVE, LOW_STOCK, OUT_OF_STOCK
   transactions InventoryTransaction[]
+  orderItems   OrderItem[]
+  subscriptions ProductSubscription[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
 
@@ -79,13 +88,80 @@ model InventoryTransaction {
   previousStock Int             // Stock previo a la operación
   newStock      Int             // Stock resultante
   reason        String?         // Motivo del movimiento
-  reference     String?         // Referencia documental (OC, Factura, Ticket)
+  reference     String?         // Referencia documental (OC, Factura, Ticket, Pedido)
   createdAt     DateTime        @default(now())
 
   @@index([productId])
   @@index([variantId])
   @@index([type])
   @@map("inventory_transactions")
+}
+
+model ShippingZone {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique // Ej: "Zona Local (Pichincha / Quito)"
+  code          String   @unique // Ej: "LOCAL_UIO"
+  description   String?
+  cost          Decimal  @db.Decimal(10, 2)
+  freeThreshold Decimal? @db.Decimal(10, 2)
+  estimatedDays String   // Ej: "24 horas laborales"
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  orders        Order[]
+
+  @@map("shipping_zones")
+}
+
+model Order {
+  id              Int          @id @default(autoincrement())
+  orderNumber     String       @unique // Ej: "TP-2026-0001"
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  customerAddress String
+  customerCity    String
+  customerCedula  String?
+  shippingZoneId  Int
+  shippingZone    ShippingZone @relation(fields: [shippingZoneId], references: [id], onDelete: Restrict)
+  paymentMethod   String       // "BANK_TRANSFER" | "CASH_ON_DELIVERY" | "SANDBOX_CARD"
+  paymentStatus   String       @default("PENDING") // "PENDING" | "PAID" | "VERIFIED" | "FAILED"
+  orderStatus     String       @default("PROCESSING") // "PROCESSING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED"
+  subtotal        Decimal      @db.Decimal(10, 2)
+  shippingCost    Decimal      @db.Decimal(10, 2)
+  taxRate         Decimal      @default(0.15) @db.Decimal(4, 2) // 15% IVA
+  taxAmount       Decimal      @db.Decimal(10, 2)
+  total           Decimal      @db.Decimal(10, 2)
+  currency        String       @default("USD")
+  notes           String?
+  items           OrderItem[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([orderNumber])
+  @@index([customerEmail])
+  @@index([orderStatus])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          Int             @id @default(autoincrement())
+  orderId     Int
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variantId   Int?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productName String
+  variantName String?
+  sku         String
+  unitPrice   Decimal         @db.Decimal(10, 2)
+  quantity    Int
+  total       Decimal         @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
 }
 
 model User {
@@ -98,3 +174,41 @@ model User {
 
   @@map("users")
 }
+
+model ProductSubscription {
+  id           Int             @id @default(autoincrement())
+  email        String
+  customerName String?
+  productId    Int
+  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId    Int?
+  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  status       String          @default("PENDING") // PENDING, NOTIFIED, CANCELLED
+  notifiedAt   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([email])
+  @@index([productId])
+  @@index([variantId])
+  @@index([status])
+  @@map("product_subscriptions")
+}
+
+model EmailLog {
+  id           Int      @id @default(autoincrement())
+  recipient    String
+  subject      String
+  templateType String   // "INVOICE", "NEW_ORDER_ADMIN", "LOW_STOCK_ALERT", "RESTOCK_NOTIFICATION", "TEST"
+  status       String   // "SENT", "SIMULATED", "FAILED"
+  messageId    String?
+  metadata     String?  // JSON stringified metadata
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@index([recipient])
+  @@index([templateType])
+  @@index([status])
+  @@map("email_logs")
+}
+

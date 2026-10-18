@@ -47,10 +47,10 @@ flowchart LR
   - [x] Validar migraciones automáticas y persistencia de datos ante reinicios de contenedor.
 
 - **Dev 2 (Backend Core, Seed & Ingesta de Catálogo)**:
-  - [ ] Inicializar el servidor Express con TypeScript en [`backend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend).
-  - [ ] Preparar el catálogo inicial en [`data/initial_inventory.csv`](file:///Users/edissonmorocho/PracticasWeb/techparts/data/initial_inventory.csv) con al menos 10 productos realistas distribuidos en más de 3 categorías con sus respectivas variantes (ej. SSD 1TB/2TB, GPUs 12GB/16GB).
-  - [ ] Desarrollar el script de carga masiva y migración [`seed.ts`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend/prisma/seed.ts).
-  - [ ] Implementar middleware global de manejo de excepciones y validación de tipos con Zod.
+  - [x] Inicializar el servidor Express con TypeScript en [`backend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend).
+  - [x] Preparar el catálogo inicial en [`data/initial_inventory.csv`](file:///Users/edissonmorocho/PracticasWeb/techparts/data/initial_inventory.csv) con al menos 10 productos realistas distribuidos en más de 3 categorías con sus respectivas variantes (ej. SSD 1TB/2TB, GPUs 12GB/16GB).
+  - [x] Desarrollar el script de carga masiva y migración [`seed.ts`](file:///Users/edissonmorocho/PracticasWeb/techparts/backend/prisma/seed.ts).
+  - [x] Implementar middleware global de manejo de excepciones y validación de tipos con Zod.
 
 - **Dev 3 (Frontend Setup, Tokens Stitch & Vistas Base)**:
   - [ ] Inicializar el frontend React 18 + Vite + TypeScript en [`frontend/`](file:///Users/edissonmorocho/PracticasWeb/techparts/frontend).
@@ -71,12 +71,12 @@ flowchart LR
 
 #### 📌 Asignación Equitativa de Tareas:
 - **Dev 2 (Líder - Lógica Comercial, Pagos & Envíos)**:
-  - [ ] Implementar el servicio de Checkout y Pedidos con soporte para:
+  - [x] Implementar el servicio de Checkout y Pedidos con soporte para:
     - **Métodos de Pago**: Transferencia bancaria directa y Pago contra entrega (o pasarela Sandbox).
     - **Zonas de Envío**: Configuración de al menos una zona geográfica con método de despacho y tarifa asignada.
     - Definición de moneda (USD/EUR) y cálculo de impuestos básicos.
-  - [ ] Crear endpoints para gestión de pedidos y órdenes de compra con transacciones seguras (ACID).
-  - [ ] Validar reglas de descuento de stock por cada ítem/variante al completarse una orden.
+  - [x] Crear endpoints para gestión de pedidos y órdenes de compra con transacciones seguras (ACID).
+  - [x] Validar reglas de descuento de stock por cada ítem/variante al completarse una orden.
 
 - **Dev 1 (Motor de Reglas de Compatibilidad & Integridad)**:
   - [ ] Diseñar las reglas de compatibilidad de hardware para PC en el backend:
@@ -119,9 +119,9 @@ flowchart LR
     - Correo de notificación de **"Nuevo Pedido"** para el administrador.
 
 - **Dev 2 (Lógica de Automatización de Alertas & Notificaciones de Reposición)**:
-  - [ ] Implementar la **Alerta Automática de Stock Bajo** para el Administrador: cuando una transacción reduzca el stock de un producto o variante por debajo de `minStock`, disparar el correo de alerta con detalles del SKU y stock restante.
-  - [ ] Implementar la **Notificación de Reposición ("Vuelve a estar disponible")**: cuando se ejecute un ingreso (`IN`) sobre un producto agotado, notificar automáticamente a los clientes suscritos.
-  - [ ] Registrar logs de auditoría para cada correo enviado exitosamente.
+  - [x] Implementar la **Alerta Automática de Stock Bajo** para el Administrador: cuando una transacción reduzca el stock de un producto o variante por debajo de `minStock`, disparar el correo de alerta con detalles del SKU y stock restante.
+  - [x] Implementar la **Notificación de Reposición ("Vuelve a estar disponible")**: cuando se ejecute un ingreso (`IN`) sobre un producto agotado, notificar automáticamente a los clientes suscritos.
+  - [x] Registrar logs de auditoría para cada correo enviado exitosamente.
 
 #### ✅ Criterios de Aceptación (DoD Fase 3):
 1. Cada ficha de producto cuenta con botón de WhatsApp con mensaje precargado que incluye el nombre exacto de la pieza.
@@ -141,11 +141,11 @@ flowchart LR
   - [ ] Redactar la sección del informe sobre **Arquitectura Técnica, Dockerización y Configuración SMTP** (con credenciales ocultas en las capturas).
 
 - **Dev 2 (Pruebas del Ciclo de Compra & Manual de Usuario)**:
-  - [ ] Ejecutar y certificar el ciclo de compra completo desde dos perspectivas:
+  - [x] Ejecutar y certificar el ciclo de compra completo desde dos perspectivas:
     - Perspectiva del Cliente: selección de producto, consulta de compatibilidad, carrito, checkout, selección de pago y recepción de factura.
     - Perspectiva del Administrador: recepción de pedido, deducción de stock y recepción de alerta de stock bajo.
-  - [ ] Elaborar el **Manual Breve de Usuario**: instructivo paso a paso para realizar una compra y para contactar al soporte técnico por WhatsApp.
-  - [ ] Redactar la justificación de decisiones comerciales, métodos de pago y zonas de envío para el informe.
+  - [x] Elaborar el **Manual Breve de Usuario**: instructivo paso a paso para realizar una compra y para contactar al soporte técnico por WhatsApp.
+  - [x] Redactar la justificación de decisiones comerciales, métodos de pago y zonas de envío para el informe.
 
 - **Dev 3 (Evidencias Visuales, Informe Técnico PDF & Guión de Demo)**:
   - [ ] Tomar y organizar el set completo de **evidencias fotográficas**:
