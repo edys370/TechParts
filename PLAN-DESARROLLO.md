@@ -112,9 +112,9 @@ flowchart LR
   - [ ] Diseñar el modal/formulario de suscripción para clientes: *"Notificarme cuando este producto vuelva a estar disponible"*.
 
 - **Dev 1 (Infraestructura SMTP & Plantillas de Correo Transaccional)**:
-  - [ ] Configurar el servicio de envío de correos vía **SMTP** (utilizando Nodemailer / WP Mail SMTP con Mailtrap para pruebas locales o Brevo/Gmail con credenciales seguras vía `.env`).
-  - [ ] Prohibir terminantemente el uso de la función insegura `mail()` de PHP/Node nativo.
-  - [ ] Diseñar las **Plantillas de Correo HTML personalizadas** con la identidad de TechParts (logotipo, colores institucionales y pie de página):
+  - [x] Configurar el servicio de envío de correos vía **SMTP** (utilizando Nodemailer / WP Mail SMTP con Mailtrap para pruebas locales o Brevo/Gmail con credenciales seguras vía `.env`).
+  - [x] Prohibir terminantemente el uso de la función insegura `mail()` de PHP/Node nativo.
+  - [x] Diseñar las **Plantillas de Correo HTML personalizadas** con la identidad de TechParts (logotipo, colores institucionales y pie de página):
     - Correo transaccional de **Pedido Recibido** y **Factura Digital adjunta**.
     - Correo de notificación de **"Nuevo Pedido"** para el administrador.
 

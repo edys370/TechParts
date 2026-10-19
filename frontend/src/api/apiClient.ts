@@ -113,3 +113,22 @@ export const compatibilityService = {
   },
 };
 
+// Servicio de Correo Transaccional SMTP
+export const emailService = {
+  async verify(): Promise<{ success: boolean; message: string; host: string; port: number }> {
+    const response = await apiClient.get('/email/verify');
+    return response.data;
+  },
+
+  async sendInvoice(data: any): Promise<{ success: boolean; message?: string; messageId?: string; previewUrl?: string }> {
+    const response = await apiClient.post('/email/send-invoice', data);
+    return response.data;
+  },
+
+  async sendTestInvoice(to?: string): Promise<{ success: boolean; message?: string; messageId?: string; previewUrl?: string }> {
+    const response = await apiClient.post('/email/test-invoice', { to });
+    return response.data;
+  },
+};
+
+

@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
-import { healthService } from '../api/apiClient';
-import { Database, Server, Terminal, ShieldCheck, RefreshCw } from 'lucide-react';
+import { healthService, emailService } from '../api/apiClient';
+import { Database, Server, Terminal, ShieldCheck, RefreshCw, Mail } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const [healthData, setHealthData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Estados de prueba SMTP
+  const [isVerifyingSmtp, setIsVerifyingSmtp] = useState(false);
+  const [isSendingInvoice, setIsSendingInvoice] = useState(false);
+  const [testEmail, setTestEmail] = useState('cliente.demo@techparts.com');
+  const [smtpResult, setSmtpResult] = useState<{ success: boolean; message: string; previewUrl?: string } | null>(null);
 
   const fetchHealth = async () => {
     setIsLoading(true);
@@ -87,6 +93,104 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      </Card>
+
+      {/* Tarjeta de Diagnóstico SMTP y Envío de Factura de Prueba */}
+      <Card
+        title="Servicio de Correos Transaccionales (SMTP)"
+        subtitle="Verificación de servidor SMTP (Mailtrap / Brevo) y prueba de factura digital"
+      >
+        <div className="space-y-4 text-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <div>
+              <p className="font-semibold text-slate-800">Prueba de Conexión SMTP</p>
+              <p className="text-slate-500 mt-0.5">Verifica autenticación y puerto (puerto 2525 / 587)</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                setIsVerifyingSmtp(true);
+                setSmtpResult(null);
+                try {
+                  const res = await emailService.verify();
+                  setSmtpResult({ success: res.success, message: res.message });
+                } catch (err: any) {
+                  setSmtpResult({ success: false, message: err?.response?.data?.message || err.message });
+                } finally {
+                  setIsVerifyingSmtp(false);
+                }
+              }}
+              isLoading={isVerifyingSmtp}
+            >
+              Verificar Conexión SMTP
+            </Button>
+          </div>
+
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+            <div>
+              <p className="font-semibold text-slate-800">Enviar Factura de Demostración</p>
+              <p className="text-slate-500 mt-0.5">Dispara una factura con componentes y formato oficial de TechParts</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="email"
+                placeholder="correo.destino@ejemplo.com"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                className="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={async () => {
+                  if (!testEmail) return;
+                  setIsSendingInvoice(true);
+                  setSmtpResult(null);
+                  try {
+                    const res = await emailService.sendTestInvoice(testEmail);
+                    setSmtpResult({
+                      success: true,
+                      message: res.message || 'Factura enviada exitosamente',
+                      previewUrl: res.previewUrl,
+                    });
+                  } catch (err: any) {
+                    setSmtpResult({ success: false, message: err?.response?.data?.message || err.message });
+                  } finally {
+                    setIsSendingInvoice(false);
+                  }
+                }}
+                isLoading={isSendingInvoice}
+              >
+                Enviar Factura Demo
+              </Button>
+            </div>
+          </div>
+
+          {smtpResult && (
+            <div
+              className={`p-3 rounded-xl border text-xs ${
+                smtpResult.success
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-rose-50 border-rose-200 text-rose-800'
+              }`}
+            >
+              <p className="font-medium">{smtpResult.message}</p>
+              {smtpResult.previewUrl && (
+                <p className="mt-1">
+                  <a
+                    href={smtpResult.previewUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600 font-semibold"
+                  >
+                    Abrir vista previa del correo en navegador ↗
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </Card>
 
