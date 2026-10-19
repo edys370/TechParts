@@ -79,11 +79,11 @@ flowchart LR
   - [ ] Validar reglas de descuento de stock por cada ítem/variante al completarse una orden.
 
 - **Dev 1 (Motor de Reglas de Compatibilidad & Integridad)**:
-  - [ ] Diseñar las reglas de compatibilidad de hardware para PC en el backend:
+  - [x] Diseñar las reglas de compatibilidad de hardware para PC en el backend:
     - Compatibilidad de Socket de CPU con Placa Base (ej. AM5 para Ryzen 7000/8000, LGA1700 para Intel 12-14va gen).
     - Compatibilidad de tipo de memoria (DDR4 vs DDR5).
     - Requerimiento de potencia sugerida de fuente de poder (PSU) según GPU seleccionada.
-  - [ ] Exponer endpoint `/api/compatibility/check` para validación asistida de compatibilidad entre piezas.
+  - [x] Exponer endpoint `/api/compatibility/check` para validación asistida de compatibilidad entre piezas.
 
 - **Dev 3 (UI de Checkout, Aviso de Compatibilidad & Políticas)**:
   - [ ] Implementar el **Aviso de Compatibilidad en la Tienda** (banner informativo y alertas visuales en ficha de producto para evitar incompatibilidades de socket o potencia).

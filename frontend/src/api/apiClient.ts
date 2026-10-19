@@ -91,3 +91,25 @@ export const healthService = {
     return response.data;
   },
 };
+
+// Servicio de Reglas de Compatibilidad Técnica
+export const compatibilityService = {
+  async check(data: {
+    productIds?: number[];
+    cpuId?: number;
+    motherboardId?: number;
+    ramId?: number;
+    gpuId?: number;
+    psuId?: number;
+    customSpecs?: any[];
+  }) {
+    const response = await apiClient.post('/compatibility/check', data);
+    return response.data;
+  },
+
+  async getGuidelines() {
+    const response = await apiClient.get('/compatibility/guidelines');
+    return response.data;
+  },
+};
+
