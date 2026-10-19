@@ -11,7 +11,10 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "test:acid": "ts-node scripts/test-acid-concurrency.ts",
+    "db:backup": "ts-node scripts/db-backup.ts",
+    "db:restore": "ts-node scripts/db-restore.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

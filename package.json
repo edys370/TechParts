@@ -14,7 +14,10 @@
     "db:migrate": "npm --prefix backend run prisma:migrate",
     "db:generate": "npm --prefix backend run prisma:generate",
     "db:seed": "npm --prefix backend run prisma:seed",
-    "db:studio": "npm --prefix backend run prisma:studio"
+    "db:studio": "npm --prefix backend run prisma:studio",
+    "db:backup": "npm --prefix backend run db:backup",
+    "db:restore": "npm --prefix backend run db:restore",
+    "test:acid": "npm --prefix backend run test:acid"
   },
   "keywords": [
     "techparts",

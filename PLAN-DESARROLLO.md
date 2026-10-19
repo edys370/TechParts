@@ -136,9 +136,9 @@ flowchart LR
 
 #### 📌 Asignación Equitativa de Tareas:
 - **Dev 1 (Auditoría Técnica, Backup & Despliegue)**:
-  - [ ] Ejecutar pruebas de consistencia transaccional ACID en condiciones de concurrencia de compra.
-  - [ ] Preparar el archivo de despliegue y backup (Dump de base de datos PostgreSQL / Export All-in-One WP Migration si aplica).
-  - [ ] Redactar la sección del informe sobre **Arquitectura Técnica, Dockerización y Configuración SMTP** (con credenciales ocultas en las capturas).
+  - [x] Ejecutar pruebas de consistencia transaccional ACID en condiciones de concurrencia de compra.
+  - [x] Preparar el archivo de despliegue y backup (Dump de base de datos PostgreSQL / Export All-in-One WP Migration si aplica).
+  - [x] Redactar la sección del informe sobre **Arquitectura Técnica, Dockerización y Configuración SMTP** (con credenciales ocultas en las capturas).
 
 - **Dev 2 (Pruebas del Ciclo de Compra & Manual de Usuario)**:
   - [ ] Ejecutar y certificar el ciclo de compra completo desde dos perspectivas:

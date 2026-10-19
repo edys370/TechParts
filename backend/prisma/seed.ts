@@ -152,6 +152,161 @@ async function main() {
         });
       }
     }
+
+    // 3. Crear Variantes de Producto con control de inventario independiente
+    console.log('🔀 Configurando variantes de producto con control de stock independiente...');
+    const variantsData = [
+      {
+        productSku: 'SSD-SAM-990P-2TB',
+        variants: [
+          {
+            sku: 'SSD-990P-1TB',
+            name: 'Samsung 990 PRO 1TB NVMe M.2 PCIe 4.0',
+            capacity: '1TB',
+            color: 'Negro',
+            modelVariant: 'Standard',
+            price: 109.99,
+            costPrice: 85.00,
+            stock: 15,
+            minStock: 3,
+          },
+          {
+            sku: 'SSD-990P-2TB',
+            name: 'Samsung 990 PRO 2TB NVMe M.2 PCIe 4.0',
+            capacity: '2TB',
+            color: 'Negro',
+            modelVariant: 'Standard',
+            price: 179.99,
+            costPrice: 140.00,
+            stock: 15,
+            minStock: 3,
+          },
+        ],
+      },
+      {
+        productSku: 'GPU-NV-4070S',
+        variants: [
+          {
+            sku: 'GPU-4070S-STD-BLK',
+            name: 'NVIDIA RTX 4070 Super 12GB Standard Edition Negro',
+            capacity: '12GB',
+            color: 'Negro',
+            modelVariant: 'Standard Edition',
+            price: 599.99,
+            costPrice: 510.00,
+            stock: 7,
+            minStock: 2,
+          },
+          {
+            sku: 'GPU-4070S-OC-WHT',
+            name: 'NVIDIA RTX 4070 Super 12GB OC Edition Blanco',
+            capacity: '12GB',
+            color: 'Blanco',
+            modelVariant: 'OC White Edition',
+            price: 639.99,
+            costPrice: 535.00,
+            stock: 5,
+            minStock: 2,
+          },
+        ],
+      },
+      {
+        productSku: 'RAM-COR-32GB-RGB',
+        variants: [
+          {
+            sku: 'RAM-COR-32G-BLK',
+            name: 'Corsair Vengeance RGB 32GB (2x16GB) 6400MHz Negro',
+            capacity: '32GB',
+            color: 'Negro',
+            modelVariant: 'RGB Dual Channel Black',
+            price: 139.99,
+            costPrice: 105.00,
+            stock: 15,
+            minStock: 4,
+          },
+          {
+            sku: 'RAM-COR-32G-WHT',
+            name: 'Corsair Vengeance RGB 32GB (2x16GB) 6400MHz Blanco',
+            capacity: '32GB',
+            color: 'Blanco',
+            modelVariant: 'RGB Dual Channel White',
+            price: 144.99,
+            costPrice: 110.00,
+            stock: 10,
+            minStock: 3,
+          },
+        ],
+      },
+    ];
+
+    for (const item of variantsData) {
+      const parent = await prisma.product.findUnique({ where: { sku: item.productSku } });
+      if (!parent) continue;
+
+      let totalVariantStock = 0;
+
+      for (const v of item.variants) {
+        totalVariantStock += v.stock;
+        const vStatus = v.stock === 0 ? 'OUT_OF_STOCK' : v.stock <= v.minStock ? 'LOW_STOCK' : 'ACTIVE';
+
+        const createdVariant = await prisma.productVariant.upsert({
+          where: { sku: v.sku },
+          update: {
+            name: v.name,
+            capacity: v.capacity,
+            color: v.color,
+            modelVariant: v.modelVariant,
+            price: v.price,
+            costPrice: v.costPrice,
+            stock: v.stock,
+            minStock: v.minStock,
+            status: vStatus,
+          },
+          create: {
+            productId: parent.id,
+            sku: v.sku,
+            name: v.name,
+            capacity: v.capacity,
+            color: v.color,
+            modelVariant: v.modelVariant,
+            price: v.price,
+            costPrice: v.costPrice,
+            stock: v.stock,
+            minStock: v.minStock,
+            status: vStatus,
+          },
+        });
+
+        const vTxCount = await prisma.inventoryTransaction.count({
+          where: { variantId: createdVariant.id },
+        });
+
+        if (vTxCount === 0 && v.stock > 0) {
+          await prisma.inventoryTransaction.create({
+            data: {
+              productId: parent.id,
+              variantId: createdVariant.id,
+              type: 'IN',
+              quantity: v.stock,
+              previousStock: 0,
+              newStock: v.stock,
+              reason: 'Carga inicial de inventario de variante',
+              reference: `VAR-INIT-${v.sku}`,
+            },
+          });
+        }
+      }
+
+      // Actualizar producto padre con stock consolidado e indicador hasVariants
+      await prisma.product.update({
+        where: { id: parent.id },
+        data: {
+          hasVariants: true,
+          stock: totalVariantStock,
+          status: totalVariantStock === 0 ? 'OUT_OF_STOCK' : totalVariantStock <= parent.minStock ? 'LOW_STOCK' : 'ACTIVE',
+        },
+      });
+    }
   }
 
   console.log('✅ Seed completado satisfactoriamente.');

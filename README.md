@@ -11,10 +11,11 @@ Sistema full-stack modular de inventario y catálogo para partes y componentes t
 | **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons | Interfaz moderna, reactiva, accesible y modular con tipado estricto. |
 | **Diseño y Estilos** | Google Stitch Design Tokens, Tailwind CSS, Componentes modulares | Estética limpia, badges semánticos, alertas de stock e interfaces de control. |
 | **Backend** | Node.js, Express, TypeScript, Zod | API REST modular, validación estricta de payloads y control de errores. |
-| **Base de Datos** | PostgreSQL 16 (Docker Compose o Supabase) | Persistencia relacional, transacciones ACID para evitar inconsistencias de stock. |
-| **ORM** | Prisma ORM | Modelado declarativo, migraciones automáticas, cliente fuertemente tipado. |
-| **Migración / Seed** | Scripts TypeScript + CSV | Ingesta y migración automatizada de inventario inicial desde Google Sheets / CSV. |
-| **Contenedores** | Docker & Docker Compose | Contenedor de PostgreSQL con volumen persistente y healthcheck integrado. |
+| **Base de Datos** | PostgreSQL 16 (Docker Compose) | Persistencia relacional, transacciones ACID para evitar inconsistencias de stock. |
+| **ORM** | Prisma ORM 5.22 | Modelado declarativo, migraciones automáticas, cliente fuertemente tipado. |
+| **Servicio de Correo** | Nodemailer (SMTP Cifrado con Mailtrap / Brevo) | Facturación digital transaccional, alertas de stock bajo y avisos de reposición. |
+| **Migración / Seed** | Scripts TypeScript + CSV | Ingesta masiva de catálogo inicial y variantes con stock independiente. |
+| **Contenedores & Backup** | Docker Compose & pg_dump | Base de datos persistente, healthchecks con `pg_isready` y dumps automáticos. |
 
 ---
 
@@ -25,29 +26,43 @@ techparts/
 ├── docker-compose.yml           # Orquestación de PostgreSQL con persistencia y healthcheck
 ├── .env.example                 # Plantilla de variables de entorno globales
 ├── package.json                 # Scripts unificados de ejecución en raíz
-├── contexto.m                   # Especificaciones del proyecto TechParts
 ├── PLAN-DESARROLLO.md           # Plan de trabajo por fases para 3 agentes / desarrolladores
+├── Proyecto.md                  # Requisitos y especificaciones funcionales y técnicas
+├── DEPLOYMENT.md                # Guía integral de despliegue, backup y recuperación DRP
+├── backup/
+│   └── techparts_dump.sql       # Respaldo oficial de la base de datos relacional PostgreSQL
+├── docs/
+│   ├── INFORME-TECNICO-DEV1.md  # Informe técnico de arquitectura, dockerización y SMTP (Fase 4)
+│   └── INFORME-TECNICO-DEV1.html# Versión imprimible / PDF del informe técnico con estilos
+├── scripts/
+│   ├── backup.sh                # Script bash de respaldo automatizado
+│   └── restore.sh               # Script bash de restauración automatizada
 ├── data/
-│   └── initial_inventory.csv    # Datos semilla de inventario inicial (Google Sheets)
+│   └── initial_inventory.csv    # Datos semilla de inventario inicial
 ├── backend/                     # API REST Node.js + Express + TypeScript + Prisma
 │   ├── prisma/
-│   │   ├── schema.prisma        # Modelos relacionales: Category, Product, Transaction, User
-│   │   └── seed.ts              # Script de migración inicial de datos
+│   │   ├── schema.prisma        # Modelos: Category, Product, ProductVariant, InventoryTransaction, User
+│   │   ├── seed.ts              # Script de migración inicial de datos y variantes
+│   │   └── init.sql             # Inicialización DDL
+│   ├── scripts/
+│   │   ├── test-acid-concurrency.ts # Suite automatizada de pruebas de concurrencia ACID
+│   │   ├── db-backup.ts         # Respaldo multiplataforma de PostgreSQL
+│   │   └── db-restore.ts        # Restauración multiplataforma de PostgreSQL
 │   └── src/
-│       ├── config/              # Variables de entorno y configuración
-│       ├── controllers/         # Controladores HTTP (products, inventory, categories, health)
+│       ├── config/              # Variables de entorno y configuración SMTP
+│       ├── controllers/         # Controladores HTTP (products, inventory, categories, email, compatibility)
 │       ├── middlewares/         # Validación Zod y manejo centralizado de excepciones
 │       ├── routes/              # Enrutadores modulares de la API
-│       ├── services/            # Lógica transaccional ACID (prisma.$transaction)
+│       ├── services/            # Lógica transaccional ACID (prisma.$transaction con bloqueos FOR UPDATE)
 │       ├── utils/               # Cliente Prisma singleton y helpers
 │       ├── app.ts               # Configuración de Express y CORS
 │       └── server.ts            # Arranque del servidor y conexión con PostgreSQL
 └── frontend/                    # SPA React 18 + Vite + TypeScript + Tailwind
     ├── src/
-    │   ├── api/                 # Clientes Axios para productos, inventario y métricas
+    │   ├── api/                 # Clientes Axios para productos, inventario, compatibilidad y SMTP
     │   ├── components/layout/   # Header (con monitor DB en vivo) y Sidebar
     │   ├── components/ui/       # Botones, Cards, Modales, Badges y Tablas (Google Stitch)
-    │   ├── pages/               # Dashboard (KPIs), Inventario, Movimientos ACID y Settings
+    │   ├── pages/               # Dashboard, Inventario, Movimientos ACID y Settings (Diagnósticos)
     │   ├── types/               # Definición integral de tipos TypeScript
     │   ├── App.tsx              # Componente principal y navegación por pestañas
     │   └── main.tsx             # Punto de entrada de React
@@ -58,35 +73,23 @@ techparts/
 ## 🚀 Puesta en Marcha Rápida
 
 ### 1. Iniciar la Base de Datos PostgreSQL
-
 Asegúrate de tener Docker instalado y ejecuta en la raíz del proyecto:
-
 ```bash
 npm run db:up
 ```
 
-Para verificar que el contenedor esté corriendo y saludable:
+### 2. Cargar la Base de Datos (Restauración de Dump o Seed Inicial)
+**Opción A (Recomendada - Restaurar dump oficial con catálogo y variantes):**
 ```bash
-docker ps
+npm run db:restore
 ```
 
-### 2. Generar el Cliente de Prisma y Ejecutar el Seed
-
-Aplica el esquema relacional en PostgreSQL y puebla el inventario inicial desde `data/initial_inventory.csv`:
-
+**Opción B (Generar y migrar desde cero):**
 ```bash
-# Generar el cliente de Prisma
-npm run db:generate
-
-# Crear las tablas en PostgreSQL
-npm run db:migrate
-
-# Migrar los datos iniciales
-npm run db:seed
+npm run db:generate && npm run db:migrate && npm run db:seed
 ```
 
 ### 3. Iniciar el Backend
-
 En una terminal:
 ```bash
 npm run dev:backend
@@ -94,7 +97,6 @@ npm run dev:backend
 El backend estará disponible en `http://localhost:4000/api` y el healthcheck en `http://localhost:4000/api/health`.
 
 ### 4. Iniciar el Frontend
-
 En otra terminal:
 ```bash
 npm run dev:frontend
@@ -103,9 +105,36 @@ Abre tu navegador en `http://localhost:5173`.
 
 ---
 
-## 🔒 Garantía de Consistencia Transaccional (ACID)
+## 🧪 Pruebas Automatizadas de Concurrencia Transaccional ACID
 
-Todas las operaciones de entrada, salida y ajuste de stock se procesan dentro de transacciones aisladas de Prisma (`prisma.$transaction`), asegurando:
-1. **Prevención de sobreventas**: No es posible descontar más unidades de las existentes físicamente.
-2. **Auditoría inmutable**: Cada variación de stock genera un registro histórico con fecha, tipo (`IN`/`OUT`/`ADJUSTMENT`), stock previo, stock resultante, motivo y comprobante de referencia.
-3. **Actualización automática de estado**: El producto pasa dinámicamente entre `ACTIVE`, `LOW_STOCK` y `OUT_OF_STOCK` según su umbral de `minStock`.
+Ejecuta la suite de auditoría técnica que certifica la consistencia transaccional y la prevención de sobreventas (*zero overselling*):
+
+```bash
+npm run test:acid
+```
+
+La suite valida:
+1. **Anti-Overselling**: 25 peticiones simultáneas sobre stock de 10 unidades.
+2. **Aislamiento por Variante**: Deducción concurrente sobre variantes técnicas independientes.
+3. **Atomicidad y Rollback**: Reversión al 100% ante excepciones inducidas.
+4. **Operaciones Mixtas**: Entradas y salidas en paralelo con balance exacto.
+
+---
+
+## 💾 Respaldos de Base de Datos (Backup & Restore)
+
+```bash
+# Generar un nuevo volcado en caliente (backup/techparts_dump.sql)
+npm run db:backup
+
+# Restaurar la base de datos completa desde el archivo dump
+npm run db:restore
+```
+
+---
+
+## 📑 Documentación Técnica de Fase 4 (Dev 1)
+
+- 📘 [Informe Técnico de Arquitectura, Dockerización y SMTP](docs/INFORME-TECNICO-DEV1.md)
+- 🖨️ [Versión Imprimible / PDF del Informe Técnico](docs/INFORME-TECNICO-DEV1.html)
+- 🚀 [Guía Completa de Despliegue y Recuperación ante Desastres (DEPLOYMENT.md)](DEPLOYMENT.md)

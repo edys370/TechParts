@@ -10,6 +10,23 @@ export interface Category {
 
 export type ProductStatus = 'ACTIVE' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'INACTIVE';
 
+export interface ProductVariant {
+  id: number;
+  productId: number;
+  sku: string;
+  name: string;
+  capacity?: string;
+  color?: string;
+  modelVariant?: string;
+  price: number;
+  costPrice: number;
+  stock: number;
+  minStock: number;
+  status: ProductStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Product {
   id: number;
   sku: string;
@@ -22,6 +39,8 @@ export interface Product {
   stock: number;
   minStock: number;
   status: ProductStatus;
+  hasVariants?: boolean;
+  variants?: ProductVariant[];
   categoryId: number;
   category?: Category;
   createdAt: string;
@@ -33,6 +52,7 @@ export type MovementType = 'IN' | 'OUT' | 'ADJUSTMENT';
 export interface InventoryTransaction {
   id: number;
   productId: number;
+  variantId?: number;
   product?: {
     id: number;
     sku: string;
@@ -42,6 +62,14 @@ export interface InventoryTransaction {
     category?: {
       name: string;
     };
+  };
+  variant?: {
+    id: number;
+    sku: string;
+    name: string;
+    capacity?: string;
+    color?: string;
+    stock: number;
   };
   type: MovementType;
   quantity: number;

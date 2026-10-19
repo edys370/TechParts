@@ -47,6 +47,9 @@ export class ProductService {
           category: {
             select: { id: true, name: true, slug: true },
           },
+          variants: {
+            orderBy: { id: 'asc' },
+          },
         },
         orderBy: { updatedAt: 'desc' },
       }),
@@ -66,9 +69,15 @@ export class ProductService {
       where: { id },
       include: {
         category: true,
+        variants: {
+          orderBy: { id: 'asc' },
+        },
         transactions: {
           take: 10,
           orderBy: { createdAt: 'desc' },
+          include: {
+            variant: true,
+          },
         },
       },
     });

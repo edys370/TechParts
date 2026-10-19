@@ -56,11 +56,12 @@ export const categoryService = {
 export const inventoryService = {
   async registerMovement(data: {
     productId: number;
+    variantId?: number;
     type: MovementType;
     quantity: number;
     reason?: string;
     reference?: string;
-  }): Promise<{ success: boolean; message: string; data: { product: Product; transaction: InventoryTransaction } }> {
+  }): Promise<{ success: boolean; message: string; data: { product: Product; variant?: any; transaction: InventoryTransaction } }> {
     const response = await apiClient.post('/inventory/movements', data);
     return response.data;
   },
@@ -80,6 +81,21 @@ export const inventoryService = {
 
   async getMetrics(): Promise<{ success: boolean; data: DashboardMetrics }> {
     const response = await apiClient.get('/inventory/metrics');
+    return response.data;
+  },
+
+  async testConcurrency(data?: {
+    productId?: number;
+    variantId?: number;
+    concurrentRequests?: number;
+    quantityPerRequest?: number;
+  }): Promise<{ success: boolean; message: string; data: any }> {
+    const response = await apiClient.post('/inventory/test-concurrency', data || {});
+    return response.data;
+  },
+
+  async testRollback(productId?: number): Promise<{ success: boolean; data: any }> {
+    const response = await apiClient.post('/inventory/test-rollback', { productId });
     return response.data;
   },
 };
